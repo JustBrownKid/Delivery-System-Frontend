@@ -1,0 +1,124 @@
+import React, { useState } from 'react'
+import Webcam from '../Pages/Webcam'
+import logo from '../../assets/two.png'
+import Order from '../Order/Order'
+const OrderHistory = () => {
+  return (
+    <div className="container h-50 animate-fade-in">
+      <ul className="space-y-4">
+        <li className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+          Order #12345 - <span className="font-semibold text-green-600">Shipped</span>
+        </li>
+        <li className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+          Order #12346 - <span className="font-semibold text-yellow-600">In Progress</span>
+        </li>
+        <li className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+          Order #12347 - <span className="font-semibold text-blue-600">Delivered</span>
+        </li>
+        {Array.from({ length: 15 }).map((_, i) => (
+          <li
+            key={i}
+            className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            Order #1234{i + 8} - <span className="font-semibold text-gray-500">Processing</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+const Sidebar = ({ onNavigate, currentPage }) => {
+  const navItemClass = (page) =>
+    `flex items-center space-x-3 cursor-pointer py-4 px-6 rounded-xl transition-colors duration-200 ${
+      currentPage === page ? 'bg-blue-600 text-white shadow-inner font-bold' : 'hover:bg-gray-700'
+    }`
+
+  return (
+    <nav className="w-64 bg-gray-900 text-white flex-shrink-0 p-6">
+      <div className="flex items-center space-x-3 mb-10">
+        <img src={logo} alt="Dome Logo" className="h-20 w-auto" />
+      </div>
+      <ul className="space-y-4">
+        <li className={navItemClass('createOrder')} onClick={() => onNavigate('createOrder')}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Create Order</span>
+        </li>
+        <li className={navItemClass('orderHistory')} onClick={() => onNavigate('orderHistory')}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+            />
+          </svg>
+          <span>Order History</span>
+        </li>
+        <li className={navItemClass('parcelSizing')} onClick={() => onNavigate('parcelSizing')}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 7v10m0 0h16m0 0V7m-9 4h3m-3 4h3m0 0h-3m3 0v4m-3-4v4"
+            />
+          </svg>
+          <span>Parcel Sizing</span>
+        </li>
+      </ul>
+    </nav>
+  )
+}
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState('createOrder')
+  const [orderData, setOrderData] = useState({})
+  const [pickUp, setPickUp] = useState(false)
+
+  const renderPage = () => {  
+    switch (currentPage) {
+      case 'createOrder':
+        return (
+          <div className="h-screen">
+              <Order  />
+          </div>
+        )
+      case 'orderHistory':
+        return <OrderHistory />
+      case 'parcelSizing':
+        return <Webcam />
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex">
+      <Sidebar onNavigate={setCurrentPage} currentPage={currentPage} />
+      <div className="flex flex-col flex-1">
+        <main className="flex-1 overflow-y-auto">{renderPage()}</main>
+      </div>
+    </div>
+  )
+}

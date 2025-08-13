@@ -2,11 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// Removed 'onBack' and 'token' props as they are no longer used
 const OtpVerifyForm = ({ email }) => {
   const [otpDigits, setOtpDigits] = useState(new Array(6).fill(''));
   const [loading, setLoading] = useState(false);
-  // Removed resend-related state variables
   const [alert, setAlert] = useState(null);
 
   const inputsRef = useRef([]);
@@ -17,7 +15,6 @@ const OtpVerifyForm = ({ email }) => {
     inputsRef.current[0]?.focus();
   }, []);
 
-  // Removed useEffect for resendCooldown
 
   const handleChange = (e, index) => {
     const val = e.target.value;
@@ -50,9 +47,10 @@ const OtpVerifyForm = ({ email }) => {
     setAlert(null);
 
     try {
-      const res = await axios.post('http://localhost:5000/users/verify', {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const res = await axios.post(`${apiUrl}/users/verify`, {
         email,
-        otp, // Make sure this matches backend key (e.g., 'otp' or 'otpCode')
+        otp, 
       });
 
       setAlert({ type: 'success', message: res.data.message });
@@ -130,7 +128,7 @@ const OtpVerifyForm = ({ email }) => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition duration-200"
+          className="w-full py-2 px-4 bg-[#524DDA] text-white font-semibold rounded-md hover:bg-[#FFBC49] transition duration-200"
         >
           {loading ? 'Verifying...' : 'Verify OTP'}
         </button>

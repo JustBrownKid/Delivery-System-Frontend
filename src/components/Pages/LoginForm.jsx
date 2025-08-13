@@ -1,7 +1,7 @@
-// LoginForm.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import logo from '../../assets/two.png'
 
 const LoginForm = ({ onOtpSent ,token }) => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -17,19 +17,18 @@ const LoginForm = ({ onOtpSent ,token }) => {
     setLoading(true);
     setAlert(null);
     try {
-      const res = await axios.post('http://192.168.68.192:5000/users/login', form, {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const res = await axios.post(`${apiUrl}/users/login`, form, {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      // Save token if backend returns it at login (optional)
       if (res.data.token) {
         token(res.data.token);
       }
 
-      // Notify parent with email to start OTP verification flow
       onOtpSent(form.email);
 
-      navigate('/verify-otp'); // Or just let parent render OTP form, based on your routing
+      navigate('/verify-otp'); 
     } catch (err) {
       setAlert({
         type: 'error',
@@ -42,12 +41,15 @@ const LoginForm = ({ onOtpSent ,token }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-white">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md w-full max-w-md mx-auto space-y-4"
+        className="bg-white-300 p-6 rounded-lg shadow-lg shadow-gray-400 w-full max-w-md mx-auto space-y-4"
       >
-        <h2 className="text-xl font-semibold text-gray-800">Login</h2>
+        <div className="flex justify-center">
+            <img src={logo} alt="Dome Logo" className="h-20 w-auto" />
+            
+        </div>
 
         {alert && (
           <div
@@ -79,7 +81,7 @@ const LoginForm = ({ onOtpSent ,token }) => {
             value={form.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-800 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#524DDA]"
           />
         </div>
 
@@ -92,14 +94,14 @@ const LoginForm = ({ onOtpSent ,token }) => {
             value={form.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-800 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#524DDA]"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition duration-200"
+          className="w-full py-2 px-4 bg-[#524DDA] text-white font-semibold rounded-md hover:bg-[#FFBC49] transition duration-200"
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>

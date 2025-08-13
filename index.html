@@ -5,6 +5,30 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <link href="/src/index.css" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    .print-section,
+    .print-section * {
+      visibility: visible;
+    }
+
+    .print-section {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+  }
+
+  .no-print {
+    display: none !important;
+  }
+</style>
+
     <title>Vite + React</title>
   </head>
   <body>
