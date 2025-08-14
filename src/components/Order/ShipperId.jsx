@@ -49,7 +49,7 @@ const ShipperId = ({ setShipper, setSelect }) => {
   };
 
   return (
-    <div className="w-full p-4 bg-white rounded-lg shadow-lg mb-4 space-y-4 mt-1">
+    <div className="w-full p-4  rounded-lg mb-4 space-y-4 mt-1">
       {!shipperSelected && (
         <div className="flex items-center space-x-2">
           <input

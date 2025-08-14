@@ -15,7 +15,10 @@ export const OrderCreation = ({ orderData, onSubmit }) => {
     onSubmit({
       shipper: orderData || {},
       orders,
-      inputMode,
+    });
+    console.log("Submitted Orders:", {
+      shipper: orderData || {},
+      orders,
     });
 
     setFormData([]);
@@ -52,14 +55,65 @@ export const OrderCreation = ({ orderData, onSubmit }) => {
       {inputMode === 'file' && (
         <>
           <FileUpload setFileData={setFileData} />
-          {fileData.length > 0 && (
-            <div className="mb-4">
-              <label className="font-semibold mb-2 block">Uploaded Orders:</label>
-              <pre className="bg-gray-100 p-4 rounded max-h-96 overflow-auto">
-                {JSON.stringify(fileData, null, 2)}
-              </pre>
-            </div>
-          )}
+          {fileData && fileData.length > 0 && (
+  <div>
+    {fileData && fileData.length > 0 && (
+  <div>
+    <label className="font-semibold mb-2 block">Uploaded Orders:</label>
+    <div className="bg-gray-100 p-4 rounded max-h-96 overflow-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50 sticky top-0">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Customer Name
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Phone
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Address
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              COD
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Delivery
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Note
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {fileData.map((item, index) => (
+            <tr key={index}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {item.cusName}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.cusPhone}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.cusAddress}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.cod}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.delivery ? 'Yes' : 'No'}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {item.note}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+  </div>
+)}
         </>
       )}
 

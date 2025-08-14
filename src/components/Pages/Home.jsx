@@ -1,32 +1,8 @@
 import React, { useState } from 'react'
 import Webcam from '../Pages/Webcam'
 import logo from '../../assets/two.png'
-import Order from '../Order/Order'
-const OrderHistory = () => {
-  return (
-    <div className="container h-50 animate-fade-in">
-      <ul className="space-y-4">
-        <li className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
-          Order #12345 - <span className="font-semibold text-green-600">Shipped</span>
-        </li>
-        <li className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
-          Order #12346 - <span className="font-semibold text-yellow-600">In Progress</span>
-        </li>
-        <li className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
-          Order #12347 - <span className="font-semibold text-blue-600">Delivered</span>
-        </li>
-        {Array.from({ length: 15 }).map((_, i) => (
-          <li
-            key={i}
-            className="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
-          >
-            Order #1234{i + 8} - <span className="font-semibold text-gray-500">Processing</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
+import Order from './Order'
+import OrderHistory from './OrderHistory'
 
 const Sidebar = ({ onNavigate, currentPage }) => {
   const navItemClass = (page) =>
@@ -105,7 +81,11 @@ export default function App() {
           </div>
         )
       case 'orderHistory':
-        return <OrderHistory />
+        return (
+          <div className="h-screen">
+              <OrderHistory />
+          </div>
+        )
       case 'parcelSizing':
         return <Webcam />
       default:

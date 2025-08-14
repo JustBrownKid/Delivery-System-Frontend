@@ -19,7 +19,7 @@ const normalizeDelivery = (val) => {
   return Boolean(val);
 };
 
-const FileUpload = ({ setFileData }) => {
+const FileUpload = ({ setFileData, fileData }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -113,6 +113,7 @@ const FileUpload = ({ setFileData }) => {
       ) : (
         <div className="bg-violet-50 border border-violet-400 text-violet-800 p-4 rounded-lg flex justify-between items-center">
           <div>
+            {/* This will now be safe because selectedFile is an object */}
             <p className="font-semibold">{selectedFile.name}</p>
             {loading && <p className="text-sm text-gray-600">Processing...</p>}
             {error && <p className="text-red-600">{error}</p>}
@@ -124,6 +125,48 @@ const FileUpload = ({ setFileData }) => {
           >
             ✕
           </button>
+        </div>
+      )}
+      {selectedFile && !loading && !error && Array.isArray(fileData) && fileData.length > 0 && (
+        <div className="mt-4 bg-white p-4 rounded-lg shadow-md">
+          <h3 className="text-lg font-bold mb-2">Uploaded Data</h3>
+          <ul className="divide-y divide-gray-200 max-h-64 overflow-y-auto">
+            {fileData.map((item, index) => (
+              <li key={index} className="py-2">
+                <p>
+                  <span className="font-semibold">Customer Name:</span>{" "}
+                  {item.cusName}
+                </p>
+                <p>
+                  <span className="font-semibold">Phone:</span> {item.cusPhone}
+                </p>
+                <p>
+                  <span className="font-semibold">Address:</span>{" "}
+                  {item.cusAddress}
+                </p>
+                <p>
+                  <span className="font-semibold">COD:</span> {item.cod}
+                </p>
+                <p>
+                  <span className="font-semibold">Delivery:</span>{" "}
+                  {item.delivery ? "Yes" : "No"}
+                </p>
+                <p>
+                  <span className="font-semibold">City ID:</span> {item.cityId}
+                </p>
+                <p>
+                  <span className="font-semibold">Note:</span> {item.note}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Empty data message */}
+      {selectedFile && !loading && !error && Array.isArray(fileData) && fileData.length === 0 && (
+        <div className="mt-4 text-center text-gray-500">
+          No valid data found in the file.
         </div>
       )}
     </div>
