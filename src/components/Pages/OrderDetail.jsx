@@ -17,55 +17,55 @@ const OrderDetailPage = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleSearch = async () => {
-  if (!shipperId && !name && !phone && !trackingId && !startDate && !endDate) {
-    setError("Please enter at least one search field.");
-    return;
-  }
+    if (!shipperId && !name && !phone && !trackingId && !startDate && !endDate) {
+      setError("Please enter at least one search field.");
+      return;
+    }
 
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    const trackingIdsArray = trackingId
-      ? trackingId
+    try {
+      const trackingIdsArray = trackingId
+        ? trackingId
           .split(/[\s,]+/) // split by comma or space
           .map((id) => id.trim())
           .filter((id) => id !== "")
-      : [];
+        : [];
 
-    const params = {
-      shipperId: shipperId || undefined,
-      name: name || undefined,
-      phone: phone || undefined,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
-    };
+      const params = {
+        shipperId: shipperId || undefined,
+        name: name || undefined,
+        phone: phone || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      };
 
-    if (trackingIdsArray.length === 1) {
-      params.trackingId = trackingIdsArray[0]; // ✅ exact search
-    } else if (trackingIdsArray.length > 1) {
-      params.trackingIds = trackingIdsArray; // ✅ multiple search
+      if (trackingIdsArray.length === 1) {
+        params.trackingId = trackingIdsArray[0]; // ✅ exact search
+      } else if (trackingIdsArray.length > 1) {
+        params.trackingIds = trackingIdsArray; // ✅ multiple search
+      }
+
+      const response = await axios.get(`${apiUrl}/order/search`, { params });
+
+      const results = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data || [];
+
+      if (results.length === 0) {
+        setOrders([]);
+        setError("No orders found.");
+      } else {
+        setOrders(results);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch orders. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    const response = await axios.get(`${apiUrl}/order/search`, { params });
-
-    const results = Array.isArray(response.data)
-      ? response.data
-      : response.data?.data || [];
-
-    if (results.length === 0) {
-      setOrders([]);
-      setError("No orders found.");
-    } else {
-      setOrders(results);
-    }
-  } catch (err) {
-    console.error(err);
-    setError("Failed to fetch orders. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleView = (trackingId) => {

@@ -7,8 +7,7 @@ import OrderDetailPage from './OrderDetail'
 
 const Sidebar = ({ onNavigate, currentPage }) => {
   const navItemClass = (page) =>
-    `flex items-center space-x-3 cursor-pointer py-4 px-6 rounded-xl transition-colors duration-200 ${
-      currentPage === page ? 'bg-blue-600 text-white shadow-inner font-bold' : 'hover:bg-gray-700'
+    `flex items-center space-x-3 cursor-pointer py-4 px-6 rounded-xl transition-colors duration-200 ${currentPage === page ? 'bg-blue-600 text-white shadow-inner font-bold' : 'hover:bg-gray-700'
     }`
 
   const handleLogout = () => {
@@ -67,7 +66,7 @@ const Sidebar = ({ onNavigate, currentPage }) => {
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
               />
             </svg>
-            <span>Order History</span>
+            <span>Airway Print</span>
           </li>
           <li className={navItemClass('parcelSizing')} onClick={() => onNavigate('parcelSizing')}>
             <svg
@@ -105,24 +104,24 @@ export default function App() {
   const [orderData, setOrderData] = useState({})
   const [pickUp, setPickUp] = useState(false)
 
-  const renderPage = () => {  
+  const renderPage = () => {
     switch (currentPage) {
       case 'createOrder':
         return (
           <div className="h-screen">
-              <Order />
+            <Order />
           </div>
         )
       case 'detail':
         return (
           <div className="h-screen">
-              <OrderDetailPage />
+            <OrderDetailPage />
           </div>
         )
       case 'orderHistory':
         return (
           <div className="h-screen">
-              <OrderHistory />
+            <OrderHistory />
           </div>
         )
       case 'parcelSizing':
