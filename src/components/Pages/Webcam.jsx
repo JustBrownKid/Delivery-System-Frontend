@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import axios from "axios";
 import Camera from "../webcam/Camera";
 
 export default function App() {
@@ -10,6 +11,8 @@ export default function App() {
   const [message, setMessage] = useState("");
   const [images, setImages] = useState([]);
   const [submittedRecords, setSubmittedRecords] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const kgInputRef = useRef(null);
   const trackingInputRef = useRef(null);
@@ -47,8 +50,8 @@ export default function App() {
 
     const newRecord = {
       trackingId: trackingValue,
-      kgValue,
-      cmValue,
+      kg: parseFloat(kgValue), // Use 'kg' as the key
+      cm: parseFloat(cmValue) || null, // Use 'cm' as the key
       images,
       timestamp: new Date().toLocaleString(),
     };
@@ -58,9 +61,43 @@ export default function App() {
     closeCamera();
   }, [kgValue, cmValue, images, closeCamera]);
 
-  const handleMainSubmit = useCallback(() => {
-    console.log("Main submit with records:", submittedRecords);
-    setSubmittedRecords([]);
+  const handleMainSubmit = useCallback(async () => {
+    if (submittedRecords.length === 0) {
+      setMessage("No records to submit.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setMessage("");
+
+    const apiUrl2 = `${apiUrl}/oswm`;
+
+    try {
+      await Promise.all(
+        submittedRecords.map(async (record) => {
+          const payload = {
+            trackingId: record.trackingId,
+            kg: record.kg, // Corrected to use 'kg'
+            cm: record.cm, // Corrected to use 'cm'
+            // NOTE: You'll need to fetch the OrderId based on the trackingId.
+            // This is a placeholder. You must replace this logic.
+            OrderId: 123,
+            Images: record.images,
+          };
+
+          const response = await axios.post(apiUrl2, payload);
+          console.log(`Successfully posted record for ${record.trackingId}:`, response.data);
+        })
+      );
+
+      setMessage("All records submitted successfully!");
+      setSubmittedRecords([]);
+    } catch (error) {
+      console.error("Failed to submit one or more records:", error);
+      setMessage("Error: Failed to submit all records. Check console for details.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }, [submittedRecords]);
 
   const handleDelete = (index) => {
@@ -116,7 +153,7 @@ export default function App() {
           <span>Submit All</span>
         </div>
         <div className="flex items-center space-x-2">
-          <kbd className="px-2 py-1 text-sm  text-black bg-gray-200 border border-gray-300 rounded">
+          <kbd className="px-2 py-1 text-sm text-black bg-gray-200 border border-gray-300 rounded">
             Ctrl + Z
           </kbd>
           <span>Capture Images</span>
@@ -130,10 +167,10 @@ export default function App() {
 
       {/* Input and submit all button */}
       <div className="flex justify-between items-center w-full space-x-2">
-        {submittedRecords.length === 5 ? (
+        {submittedRecords.length >= 5 ? (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded">
             <strong className="font-bold">Alert!</strong>
-            <span> You have submitted 5 records. Please wait before adding more.</span>
+            <span> You have 5 records ready to submit.</span>
           </div>
         ) : (
           <input
@@ -150,12 +187,15 @@ export default function App() {
         {submittedRecords.length > 0 && (
           <button
             onClick={handleMainSubmit}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-md hover:bg-blue-700 transition-colors"
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
           >
-            Submit All
+            {isSubmitting ? "Submitting..." : "Submit All"}
           </button>
         )}
       </div>
+
+      {message && <p className="text-sm mt-2 font-semibold">{message}</p>}
 
       {/* Camera Modal */}
       {showCamera && (
@@ -193,11 +233,10 @@ export default function App() {
                   onChange={(e) => setKgValue(e.target.value)}
                   onDoubleClick={() => setIsKgEditable(true)}
                   readOnly={!isKgEditable}
-                  className={`px-3 py-2 border rounded-lg w-46 text-sm ${
-                    !isKgEditable
-                      ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
-                      : "bg-white text-gray-900"
-                  }`}
+                  className={`px-3 py-2 border rounded-lg w-46 text-sm ${!isKgEditable
+                    ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300"
+                    : "bg-white text-gray-900"
+                    }`}
                 />
               </div>
 
@@ -246,11 +285,11 @@ export default function App() {
                     Tracking ID: <strong>{record.trackingId}</strong>
                   </p>
                   <p>
-                    KG: <strong>{record.kgValue} kg</strong>
+                    KG: <strong>{record.kg} kg</strong>
                   </p>
-                  {record.cmValue && (
+                  {record.cm && (
                     <p>
-                      CM: <strong>{record.cmValue} cm</strong>
+                      CM: <strong>{record.cm} cm</strong>
                     </p>
                   )}
                 </div>

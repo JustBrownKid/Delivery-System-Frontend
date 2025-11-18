@@ -1,99 +1,173 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
 
 const OrderHistory = () => {
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [selectedOrderIds, setSelectedOrderIds] = useState([]); 
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [shipperId, setShipperId] = useState('');
+  const [trackingId, setTrackingId] = useState('');
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const apiUrl = import.meta.env.VITE_API_URL;
-                const response = await axios.get(`${apiUrl}/order`);
-                setOrders(response.data.data);
-                setLoading(false);
-            } catch (err) {
-                setError("Failed to fetch orders.");
-                setLoading(false);
-            }
-        };
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
 
-        fetchOrders();
-    }, []);
+  const fetchOrders = async (params = {}) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${apiUrl}/order/search`, { params });
+      let fetchedOrders = response.data.data || [];
 
-    const handleCheckboxChange = (event) => {
-        const orderId = event.target.value;
-        const isChecked = event.target.checked;
+      // Limit to 20 results if searching by shipperId
+      if (params.shipperId) {
+        fetchedOrders = fetchedOrders.slice(0, 20);
+      }
 
-        if (isChecked) {
-            setSelectedOrderIds([...selectedOrderIds, orderId]);
-        } else {
-            setSelectedOrderIds(selectedOrderIds.filter(id => id !== orderId));
-        }
-    };
+      setOrders(fetchedOrders);
+    } catch (err) {
+      setError('Failed to fetch orders.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleLogSelected = () => {
-        const ordersToLog = orders.filter(order => selectedOrderIds.includes(order.id.toString()));
-        console.log('Selected Orders:', ordersToLog);
-    };
+  useEffect(() => {
+    fetchOrders(); // Load all orders initially
+  }, []);
 
-    if (loading) {
-        return <div>Loading order history...</div>;
+  const handleCheckboxChange = (event) => {
+    const orderId = event.target.value;
+    const isChecked = event.target.checked;
+
+    if (isChecked) {
+      setSelectedOrderIds([...selectedOrderIds, orderId]);
+    } else {
+      setSelectedOrderIds(selectedOrderIds.filter(id => id !== orderId));
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedOrderIds.length === orders.length) {
+      // Unselect all
+      setSelectedOrderIds([]);
+    } else {
+      // Select all
+      setSelectedOrderIds(orders.map(order => order.id.toString()));
+    }
+  };
+
+  const handleSearch = () => {
+    const params = {};
+
+    if (shipperId) params.shipperId = shipperId;
+
+    if (trackingId) {
+      const trackingIdsArray = trackingId
+        .split(/\s|,+/)
+        .map(id => id.trim())
+        .filter(id => id !== '');
+      params.trackingId = trackingIdsArray.join(',');
     }
 
-    if (error) {
-        return <div className="error">{error}</div>;
-    }
+    fetchOrders(params);
+  };
 
-    if (!orders || orders.length === 0) {
-        return <div>No orders found.</div>;
-    }
-
-    return (
-        <div className="order-history-container h-screen overflow-y-scroll p-4">
-            <h1 className="text-2xl font-bold mb-4">Order History</h1>
-            
-            <div className="mb-4">
-                <button 
-                    onClick={handleLogSelected}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                >
-                    Log Selected Orders
-                </button>
-            </div>
-
-            <ul className="space-y-4">
-                {orders.map(order => (
-                    <li key={order.id} className="bg-gray-100 p-4 rounded-lg shadow-md flex items-center space-x-4">
-                        <div className="flex-grow">
-                            <div className="flex justify-between items-center">
-                                <h3 className="text-lg font-semibold">{order.cusName}</h3>
-                            </div>
-                            <div className="">
-                                <p className="text-sm text-gray-700">{order.cusPhone}</p>
-                                <p className="text-sm text-gray-700">{order.cusAddress}</p>
-                            </div>
-                            <div className="flex justify-between items-center text-sm text-gray-600">
-                                <div className="flex items-center">
-                                    {order.destinationCity.name}, {order.destinationCity.state.name}
-                                </div>
-                            </div>
-                        </div>
-
-                        <input
-                            type="checkbox"
-                            value={order.id}
-                            onChange={handleCheckboxChange}
-                            checked={selectedOrderIds.includes(order.id.toString())}
-                            className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                    </li>
-                ))}
-            </ul>
-        </div>
+  const handlePrintSelected = () => {
+    const selectedOrders = orders.filter(order =>
+      selectedOrderIds.includes(order.id.toString())
     );
+
+    navigate('/awb-print', { state: { orders: selectedOrders } });
+  };
+
+  return (
+    <div className="order-history-container h-screen overflow-y-auto p-6 bg-gray-50">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Order History</h1>
+
+      {/* Search Inputs */}
+      <div className="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-3 md:space-y-0 mb-6">
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Enter Shipper ID"
+            value={shipperId}
+            onChange={(e) => setShipperId(e.target.value)}
+            className="p-2 border border-gray-300 rounded-lg w-full   "
+          />
+        </div>
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Enter Tracking IDs (comma or space separated)"
+            value={trackingId}
+            onChange={(e) => setTrackingId(e.target.value)}
+            className="p-2 border border-gray-300 rounded-lg w-full "
+          />
+        </div>
+        <button
+          onClick={handleSearch}
+          className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Search
+        </button>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={handleSelectAll}
+          disabled={orders.length === 0}
+          className="px-4 py-2 bg-gray-200 rounded-lg text-sm font-medium hover:bg-gray-300 disabled:opacity-50"
+        >
+          {selectedOrderIds.length === orders.length && orders.length > 0
+            ? 'Unselect All'
+            : 'Select All'}
+        </button>
+
+        {selectedOrderIds.length > 0 && (
+          <button
+            onClick={handlePrintSelected}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            Print AWB ({selectedOrderIds.length})
+          </button>
+        )}
+      </div>
+
+      {/* Loading / Error / No Orders */}
+      {loading && <div>Loading...</div>}
+      {error && <div className="text-red-500">{error}</div>}
+      {!loading && orders.length === 0 && <div>No orders found.</div>}
+
+      {/* Orders List */}
+      <ul className="space-y-4">
+        {orders.map(order => (
+          <li
+            key={order.id}
+            className="bg-white p-4 rounded-lg shadow flex items-center justify-between hover:shadow-md transition-shadow"
+          >
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">{order.cusName}</h3>
+              <p className="text-sm text-gray-600">{order.cusPhone}</p>
+              <p className="text-sm text-gray-600">{order.cusAddress}</p>
+              <p className="text-sm text-gray-500">
+                {order.destinationCity?.name}, {order.destinationCity?.state?.name}
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              value={order.id}
+              onChange={handleCheckboxChange}
+              checked={selectedOrderIds.includes(order.id.toString())}
+              className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 export default OrderHistory;
